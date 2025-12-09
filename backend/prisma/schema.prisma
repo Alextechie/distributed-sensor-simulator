@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Sensor {
+  id String @id @default(uuid())
+  name String
+  lastSeen DateTime @default(now())
+  status SensorStatus @default(offline) // offline/online/degraded
+  battery_level Int
+  location String
+  readings Reading[]
+  anamolies Anamoly[]
+}
+
+model Reading {
+  id String @id @default(uuid())
+  sensorId String
+  sensor Sensor @relation(fields: [sensorId], references: [id])
+  timestamp DateTime
+  reading_value Float
+  battery_level Int
+  signal_strength String
+}
+
+model Anamoly {
+  id String @id @default(uuid())
+  sensorId String
+  sensor Sensor @relation(fields: [sensorId], references: [id])
+  timestamp DateTime
+  type TypeOfAnamoly
+  description String 
+}
+
+enum TypeOfAnamoly {
+  spike
+  low_battery
+  weak_signal
+  dropout
+}
+
+enum SensorStatus {
+  offline
+  online
+  degraded
+}
